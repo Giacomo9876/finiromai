@@ -2,11 +2,12 @@ import requests
 import json
 import mysql.connector
 from mysql.connector import errorcode
+import burn_value
 
 class LoL:
     
     name = ""
-    api_key = "RGAPI-8a8ee802-5a92-40fc-a586-8846943115c0"
+    api_key = "RGAPI-6de37ef8-8e73-40db-93c2-874b27868724"
     amount = 0
     value_match_list = []
     
@@ -116,7 +117,8 @@ class LoL:
                 print(amount_listed)
                 print(len(amount_listed))
                 
-        return "amount burned: "+ str(self.amount)+" In total game played: "+str(game_counter)        
+        # return "amount burned: "+ str(self.amount)+" In total game played: "+str(game_counter)  
+        return amount  
             #champion = data[][]  jq needed .info.participants. instead using jq navigating into key with python(integrations with library jq on windows seems not working)
     
     def read_data_db(self):
@@ -134,7 +136,13 @@ class LoL:
             cnx.commit()
             myresult = cursor.fetchall()
             for x in myresult:
-                final_result.append(list(x))
+                print(x)
+                x = str(x)
+                x = x.replace("(", "")
+                x = x.replace("'", "")
+                x = x.replace(",", "")
+                x = x.replace(")", "")
+                final_result.append(x)
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")
@@ -148,9 +156,9 @@ class LoL:
         return final_result
     
     
-    def send_data_db(self):
+    def send_data_db(self, match_list_updated):
         
-        game_played = self.value_match_list
+        game_played = match_list_updated
         
         
         try:
@@ -179,6 +187,13 @@ class LoL:
         
         game_played = self.value_match_list
         game_stored = self.read_data_db()
+        print(len(game_stored))
+        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        games_equalities = []
+        final_list = []
+        cioccato = False
+        prova = BurnValue
+        amount_to_burn = self.match_id_azir_search()
         
         # inserire logica che in base a determinate condizioni fa:
         # 1 se value_match_list vuota nulla inviare valore di default di eliminazione valori
@@ -189,22 +204,46 @@ class LoL:
         
         for games in range(len(game_played)):
             
-            match = game_stored[games]
+            
+            # if da rivedere in quanto ogni singolo game va iterato per quanti presenti sono gli elementi nel db affinche non si inseriscano duplicati
+            match = game_played[games]
             print("AAAAAAAAAAAAAAAAAAAAAA")
-            print(type(match))
+            print(games)
             print(match)
-            print("AAAAAAAAAAAAAAAAAAAAAA")
-            print(type(game_played[games]))
             print("AAAAAAAAAAAAAAAAAAAAAA")
             print(type(game_stored[games]))
             print("AAAAAAAAAAAAAAAAAAAAAA")
-            if game_played[games] == match[0]:
-                print("Riscontro positivo: game eliminato da entrambe le liste.")
+            # controllo se il match è presente nella lista del db se non lo è
+            for i in game_stored:
+            
+                if i == match:
+                    print("Riscontro positivo, match già presente nel db")
+                    cioccato = True
+                    break
+            
+            
+            if cioccato is True:
+                print("Riscontro positivo: game non aggiunto alla lista finale.")
+                cioccato = False
             else:
-                print("Riscontro non trovato, matchid valido.")
+                print("Riscontro negativo, match da inserire")
+                games_equalities.append(game_played[games])
+                cioccato = False
                 
+        print(games_equalities)
+        # # self.value_match_list = game_played
+        # c = set(game_stored)
+        # d = set(games_equalities)
+        # b = set(c) - set(d)
+        nmb = len(games_equalities)
         
-        pass
+        if nmb >= 12:
+            print("12 nuovi game rilevati, si può proseguire con l'inserimento")
+            self.send_data_db(games_equalities)
+            prova.get_token_to_burn_from_lol(amount_to_burn)
+        else:
+            print(f"non ci sono 12 nuovi game da inserire, ma soltanto: {nmb}")
+        
         
         
     
@@ -212,15 +251,13 @@ a = LoL(name="ParmiJanna")
 b = a.list_game_by_puuid()
 d = a.get_matchid_list()
 c = len(b)
-print("CSTO DIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-print(a.value_match_list)
-print("CSTO DIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+# print("CSTO DIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+# print(a.value_match_list)
+# print("CSTO DIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
 print(a.get_summoners())
 print(a.match_id_azir_search())
 print(d)
 print("YOU ARRIVED HERE BITCHHHHHHHHHHHHHHHHH")
-print("YOU ARRIVED HERE BITCHHHHHHHHHHHHHHHHH")
-a.read_data_db()
-a.send_data_db()
 a.check_match_id()
-# controllare bene l'ordine e perchè la if fa come gli pare
+# a.read_data_db()
+# a.send_data_db()
