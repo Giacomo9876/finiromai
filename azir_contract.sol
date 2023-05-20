@@ -1,7 +1,8 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "contracts/token/ERC20/ERC20.sol";
+import "contracts/access/Ownable.sol";
 
 contract Azir is ERC20, Ownable {
     
@@ -23,7 +24,7 @@ contract Azir is ERC20, Ownable {
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
         require(spender != address(0), "Azir: approve to the zero address");
         require(amount <= balanceOf(msg.sender), "Azir: approve amount exceeds balance");
-        _approve(msgSender(), spender, amount);
+        _approve(_msgSender(), spender, amount);
         return true;
     }
 

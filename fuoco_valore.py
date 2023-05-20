@@ -1,6 +1,8 @@
 from solcx import compile_source
+from solcx import compile_standard, install_solc
 from web3 import Web3
-import api_lol_function
+
+install_solc("0.8.0")
 
 class BurnValue:
     
@@ -8,7 +10,7 @@ class BurnValue:
         with open("take_value.sol", "r") as f:
             source = f.read()
         compiled = compile_source(source)
-        contract_interface = compiled['<stdin>:PythonOperations']
+        contract_interface = compiled['<stdin>:BurnValue']
         self.contract = web3.eth.contract(abi=contract_interface['abi'], address=contract_address)
     
     def get_token_to_burn_from_lol(self, amount_to_burn):

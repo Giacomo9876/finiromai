@@ -2,12 +2,12 @@ import requests
 import json
 import mysql.connector
 from mysql.connector import errorcode
-import burn_value
+from fuoco_valore import BurnValue
 
 class LoL:
     
     name = ""
-    api_key = "RGAPI-6de37ef8-8e73-40db-93c2-874b27868724"
+    api_key = "RGAPI-1da04f57-a576-4d40-bbf7-67e00774ad7f"
     amount = 0
     value_match_list = []
     
@@ -82,7 +82,6 @@ class LoL:
         summoner_found = False
         amount_listed = []
         games = self.list_game_by_puuid()
-        game_counter = len(games)
         for i in games:
             url = f"https://europe.api.riotgames.com/lol/match/v5/matches/{i}?api_key={self.api_key}"
             r = requests.get(url)
@@ -118,7 +117,7 @@ class LoL:
                 print(len(amount_listed))
                 
         # return "amount burned: "+ str(self.amount)+" In total game played: "+str(game_counter)  
-        return amount  
+        return self.amount  
             #champion = data[][]  jq needed .info.participants. instead using jq navigating into key with python(integrations with library jq on windows seems not working)
     
     def read_data_db(self):
@@ -192,7 +191,7 @@ class LoL:
         games_equalities = []
         final_list = []
         cioccato = False
-        prova = BurnValue
+        prova = BurnValue("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4", 2100)
         amount_to_burn = self.match_id_azir_search()
         
         # inserire logica che in base a determinate condizioni fa:
@@ -204,8 +203,6 @@ class LoL:
         
         for games in range(len(game_played)):
             
-            
-            # if da rivedere in quanto ogni singolo game va iterato per quanti presenti sono gli elementi nel db affinche non si inseriscano duplicati
             match = game_played[games]
             print("AAAAAAAAAAAAAAAAAAAAAA")
             print(games)
@@ -213,7 +210,7 @@ class LoL:
             print("AAAAAAAAAAAAAAAAAAAAAA")
             print(type(game_stored[games]))
             print("AAAAAAAAAAAAAAAAAAAAAA")
-            # controllo se il match è presente nella lista del db se non lo è
+            # controllo se il match è presente nella lista del db se non lo è aggiungo a lista e poi invio nei controlli
             for i in game_stored:
             
                 if i == match:
@@ -231,10 +228,6 @@ class LoL:
                 cioccato = False
                 
         print(games_equalities)
-        # # self.value_match_list = game_played
-        # c = set(game_stored)
-        # d = set(games_equalities)
-        # b = set(c) - set(d)
         nmb = len(games_equalities)
         
         if nmb >= 12:
