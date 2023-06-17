@@ -2,12 +2,24 @@ import requests
 import json
 import mysql.connector
 from mysql.connector import errorcode
-from fuoco_valore import BurnValue
+from web3 import HTTPProvider
+from web3 import Web3
+from web3.middleware import geth_poa_middleware
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
+# TO DO
+# ECONOMY
+# DEPLOY
+# AGGIUSTARE FRONTEND
+# EXCHANGE
+
 
 class LoL:
     
     name = ""
-    api_key = "RGAPI-1da04f57-a576-4d40-bbf7-67e00774ad7f"
+    api_key = os.getenv("API_KEY")
     amount = 0
     value_match_list = []
     
@@ -15,13 +27,70 @@ class LoL:
         self.name = name
         
 
+    def conn_for_burn(self):
+        #10
+        # Connessione alla blockchain
+        w3 = Web3(Web3.HTTPProvider('https://goerli.infura.io/v3/eba9e534005045928e460351c954cbf8'))
+        w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        amount_to_burn = self.amount
+        caller = "0xFdB5e4A6273Ddf2A1D09a377C9E4eb407b3De2C4"
+        private_key = os.getenv("API_SECRET")  # To sign the transaction
+        # Initialize address nonce
+        nonce = w3.eth.get_transaction_count(caller)
+        print(w3.is_connected())
+        contract_address = '0x6117A5F053e65Aa9bcbE064cD186Ed9580353bCa'
+        data = open('abi.json')
+        abi = json.load(data)
+        # contract = w3.eth.contract(address=contract_address, abi=abi)
+        data = open('bytecode')
+        bytecodedelcazzo = data.readline()
+        bytecode = bytecodedelcazzo
+        
+        # 3. Create variables
+        account_from = {
+            'private_key': private_key,
+            'address': caller,
+        }
+        
+        contract_instance = w3.eth.contract(address=contract_address, abi=abi)
+
+        #value = contract_instance.functions.burn(contract_address, amount_to_burn).call()
+        transaction = contract_instance.functions.burn(caller, amount_to_burn).build_transaction({'from': account_from['address'], 'nonce': w3.eth.get_transaction_count(account_from['address']),})#build_transaction({"chainId": Chain_id, "from": caller, "nonce": nonce})
+        signed_tx = w3.eth.account.sign_transaction(transaction, private_key)
+        print(signed_tx)
+        # Send transaction
+        send_tx = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+        # Wait for transaction receipt
+        tx_receipt = w3.eth.wait_for_transaction_receipt(send_tx)
+        print(tx_receipt) # Optional
+        
+    
+    def get_balance(self):
+        
+        w3 = Web3(Web3.HTTPProvider('https://goerli.infura.io/v3/eba9e534005045928e460351c954cbf8'))
+        w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        contract_address = '0x6117A5F053e65Aa9bcbE064cD186Ed9580353bCa'
+        data = open(r'D:\Dev\finiromai\abi.json')
+        abi = json.load(data)
+        
+        token = w3.eth.contract(address=contract_address, abi=abi) # declaring the token contract
+        token_balance = token.functions.totalSupply().call() # returns int with balance, without decimals
+        print(token_balance)
+        
+        return token_balance
+        
+        
     def url_summoners(self, name):
+        #1
         url = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/"
         
         final_url = url + name + "?api_key=" + self.api_key
         return final_url
     
+    
     def get_summoners(self):
+        #2
         url = self.url_summoners(self.name)
         try:
         
@@ -36,15 +105,15 @@ class LoL:
             print("Chiamata fallita non 200, controllare api_key")
         
         
-    
     def get_puuid(self):
+        #3
         summoners = self.get_summoners()
         puuid = summoners['puuid']
         return puuid
     
     
     def get_matchid_list(self):
-        
+        #5
         lenght_game = len(self.value_match_list)
         
         if not self.value_match_list:
@@ -53,19 +122,14 @@ class LoL:
             final_url = f"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?start=0&count=20&api_key={self.api_key}"
             r = requests.get(final_url)
             data = r.json()
-            print(type(data)) 
-            print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            print(data)
-            print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             self.value_match_list = data
             return self.value_match_list
         elif lenght_game >= 20:
             print("returning list beacuse list already filled")
         
             
-    
     def list_game_by_puuid(self):
-        
+        #4
         puuid = self.get_puuid()
         final_url = f"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?start=0&count=20&api_key={self.api_key}"
         try:
@@ -77,8 +141,9 @@ class LoL:
             dir(e)
             print("Chiamata fallita non 200, controllare api_key")
         
-    def match_id_azir_search(self):
         
+    def match_id_azir_search(self):
+        #8
         summoner_found = False
         amount_listed = []
         games = self.list_game_by_puuid()
@@ -114,18 +179,16 @@ class LoL:
                 amount_listed.append(self.amount)
                 print("Adding amount: "+ str(self.amount))
                 print(amount_listed)
-                print(len(amount_listed))
-                
-        # return "amount burned: "+ str(self.amount)+" In total game played: "+str(game_counter)  
-        return self.amount  
-            #champion = data[][]  jq needed .info.participants. instead using jq navigating into key with python(integrations with library jq on windows seems not working)
+            
+        return self.amount
+    
     
     def read_data_db(self):
-        
+        #7 
         final_result = []
         
         try:
-            cnx = mysql.connector.connect(user='root', password='root',
+            cnx = mysql.connector.connect(user=os.getenv("USER"), password=os.getenv("PWD"),
                               host='127.0.0.1',
                               database='azircoin')
             
@@ -156,12 +219,14 @@ class LoL:
     
     
     def send_data_db(self, match_list_updated):
-        
+        #9
         game_played = match_list_updated
-        
+        print("AOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+        print(game_played)
+        print("--------------------")
         
         try:
-            cnx = mysql.connector.connect(user='root', password='root',
+            cnx = mysql.connector.connect(user=os.getenv("USER"), password=os.getenv("PWD"),
                               host='127.0.0.1',
                               database='azircoin')
             cursor = cnx.cursor()
@@ -183,32 +248,19 @@ class LoL:
         
         
     def check_match_id(self):
-        
+        # 6
         game_played = self.value_match_list
         game_stored = self.read_data_db()
-        print(len(game_stored))
-        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         games_equalities = []
-        final_list = []
         cioccato = False
-        prova = BurnValue("0x5B38Da6a701c568545dCfcB03FcB875f56beddC4", 2100)
         amount_to_burn = self.match_id_azir_search()
         
-        # inserire logica che in base a determinate condizioni fa:
-        # 1 se value_match_list vuota nulla inviare valore di default di eliminazione valori
-        # 2 se piena fare una query e controllare tra gli elementi della query se ci sono riscontri con la nuova lista di game presa
-        # 3 inserire i match che sono effettivamente nuovi
-        # debugging questa funzione necessita di essere controllata per prima in modo da decidere prima che dati inviare al db, quindi
-        # leggere i dati, controllarli poi inserirli
         
         for games in range(len(game_played)):
             
             match = game_played[games]
             print("AAAAAAAAAAAAAAAAAAAAAA")
-            print(games)
             print(match)
-            print("AAAAAAAAAAAAAAAAAAAAAA")
-            print(type(game_stored[games]))
             print("AAAAAAAAAAAAAAAAAAAAAA")
             # controllo se il match è presente nella lista del db se non lo è aggiungo a lista e poi invio nei controlli
             for i in game_stored:
@@ -233,24 +285,17 @@ class LoL:
         if nmb >= 12:
             print("12 nuovi game rilevati, si può proseguire con l'inserimento")
             self.send_data_db(games_equalities)
-            prova.get_token_to_burn_from_lol(amount_to_burn)
+            games_equalities = []
         else:
             print(f"non ci sono 12 nuovi game da inserire, ma soltanto: {nmb}")
         
         
+        bruciare = self.conn_for_burn()
         
+        print("CIAOOOOOOOOOOOOO: "+ str(amount_to_burn))
     
-a = LoL(name="ParmiJanna")
-b = a.list_game_by_puuid()
-d = a.get_matchid_list()
-c = len(b)
-# print("CSTO DIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-# print(a.value_match_list)
-# print("CSTO DIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
-print(a.get_summoners())
-print(a.match_id_azir_search())
-print(d)
-print("YOU ARRIVED HERE BITCHHHHHHHHHHHHHHHHH")
-a.check_match_id()
-# a.read_data_db()
-# a.send_data_db()
+        print("##################################")
+
+# a = LoL(name="ParmiJanna")
+
+# print(a.get_balance())
