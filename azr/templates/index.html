@@ -12,6 +12,17 @@
 			background-repeat: no-repeat;
 			background-size: 100% 100%;
 		}
+		.icone{
+			background-image: url({{ url_for('static', filename='images/cleancoin40.png') }});
+			width: 42px;
+			height: 42px;
+		}
+		.bgimgg {
+			background-image: url({{ url_for('static', filename='images/cleancoinbig.png') }});
+			background-repeat: no-repeat;
+			background-position: center; /* Center the image */
+			
+		}
 	</style>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -20,20 +31,6 @@
 	<meta name="description" content="" />
 	<meta name="keywords" content="" />
 	<meta name="author" content="" />
-
-  <!-- 
-	//////////////////////////////////////////////////////
-
-	FREE HTML5 TEMPLATE 
-	DESIGNED & DEVELOPED by FREEHTML5.CO
-		
-	Website: 		http://freehtml5.co/
-	Email: 			info@freehtml5.co
-	Twitter: 		http://twitter.com/fh5co
-	Facebook: 		https://www.facebook.com/fh5co
-
-	//////////////////////////////////////////////////////
-	 -->
 
   	<!-- Facebook and Twitter integration -->
 	<meta property="og:title" content=""/>
@@ -47,10 +44,9 @@
 	<meta name="twitter:card" content="" />
 
 	<!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-	<link rel="shortcut icon" href="favicon.ico">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
 	<link href="https://fonts.googleapis.com/css?family=Inconsolata:400,700" rel="stylesheet">
-	
 	<!-- Animate.css -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/animate.css') }}">
 	<!-- Icomoon Icon Fonts-->
@@ -62,31 +58,47 @@
 	<!-- Style -->
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/magnific-popup.css') }}">
+
 
 	<!-- Modernizr JS -->
 	<script src="{{ url_for('static', filename='js/modernizr-2.6.2.min.js') }}"></script>
-	<!-- FOR IE9 below -->
-	<!--[if lt IE 9]>
-	<script src="js/respond.min.js"></script>
-	<![endif]-->
+	
 
 	</head>
 	<body>
-	<!--  <header role="banner" id="fh5co-header">
+	<header role="banner" id="fh5co-header">
 		<div class="fluid-container">
 			<nav class="navbar navbar-default navbar-fixed-top js-fullheight">
 				<div id="navbar" class="navbar-collapse js-fullheight">
 					<ul class="nav navbar-nav navbar-left">
 						<li class="active"><a href="#" data-nav-section="home"><span>Home</span></a></li>
-						<li><a href="#" data-nav-section="services"><span>Services</span></a></li>
-						<li><a href="#" data-nav-section="explore"><span>Project</span></a></li>
-						<li><a href="#" data-nav-section="pricing"><span>Pricing</span></a></li>
-						<li><a href="#" data-nav-section="team"><span>Team</span></a></li>
+						<li><a href="#tokenomics" data-nav-section="services"><span>Tokenomics</span></a></li>
+						<li><a href="#explain" data-nav-section="explore"><span>Concept</span></a></li>
+						<li><a href="#timeline" data-nav-section="pricing"><span>Timeline</span></a></li>
 					</ul>
 				</div>
 			</nav>
 	  </div>
-	</header>-->
+	  <!-- <nav class="navbar navbar-dark bg-primary">
+		<a class="navbar-brand" href="#">Navbar</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+
+ 		 <div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav mr-auto">
+			<li class="nav-item active">
+				<a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#">Link</a>
+			</li>
+		</ul>
+
+	  </div>
+			</nav> -->
+	</header>
 
 	<section id="fh5co-home" data-section="home" style=" background-image: url(static/images/Shurima_The_Ruins_Of_Shurima.jpg);" data-stellar-background-ratio="0.5">
 		<div class="gradient" style="width: 100%; height: 100%;"></div>
@@ -116,7 +128,7 @@
 				<div class="row">
 					<div class="col-md-12 section-heading text-center">
 						<h2 class="to-animate"> League of Legends based token </h2>
-						<h2 class="to-animate"> Tokenomics </h2>
+						<h2 class="to-animate" id="tokenomics"> Tokenomics </h2>
 						<div class="row">
 							<div class="col-md-8 col-md-offset-2 subtext">
 								<h3 class="to-animate"> This token was created with the aim of creating a crypto around the game League of Legends so that it would depict the performance of an average player in the different game modes. The token is tied to a developer's game performance.</h3>
@@ -133,28 +145,28 @@
 								<div class="row">
 									<div class="col-md-12">
 										<div class="core">
-											<i class="icon-cloud-download to-animate-2" style="background-image: url(static/images/azr.jpg);"></i>
+											<i class="icone to-animate-2"></i>
 											<div class="fh5co-post to-animate">
 												<h3> Shurima Influence </h3>
 												<p> The token presents a preference for all those who are the champions of the game from Shurima. Obviously there is a main focus on the game history between Azir and Xerath. Those champions will give a boost to tokens that will be deleted.</p>
 											</div>
 										</div>
 										<div class="core">
-											<i class="icon-laptop to-animate-2"></i>
+											<i class="icone to-animate-2"></i>
 											<div class="fh5co-post to-animatVe">
 												<h3> EVERY DAY SOMETHING BURNS </h3>
 												<p>And is not for the f*** ignite. each day, the result of the matches generates a number of tokens that will be removed to increase the value of AzirCoin. There are bonuses for wins and losses, also based on champions played (Shurima region).</p>
 											</div>
 										</div>
 										<div class="core">
-											<i class="icon-gear to-animate-2"></i>
+											<i class="icone to-animate-2"></i>
 											<div class="fh5co-post to-animate">
 												<h3>No Game No Problem</h3>
 												<p> If no new matches are found to be registered, the previous result will automatically be taken as the value for eliminating other tokens. </p>
 											</div>
 										</div>
 										<div class="core">
-											<i class="icon-columns to-animate-2"></i>
+											<i class="icone to-animate-2"></i>
 											<div class="fh5co-post to-animate">
 												<h3> Constant Evolution </h3>
 												<p> Depending on events, leagues and LoL evolutions, the burn value changes periodically, leading to ever-improving AZR value. </p>
@@ -171,19 +183,19 @@
 						<div class="row to-animate">
 							<div class="col-md-3 text-center">
 								<span class="fh5co-counter js-counter" data-from="0" data-to="3452" data-speed="5000" data-refresh-interval="50"></span>
-								<span class="fh5co-counter-label"></span>
+								<span class="fh5co-counter-label"> ignite used </span>
 							</div>
 							<div class="col-md-3 text-center">
 								<span class="fh5co-counter js-counter" data-from="0" data-to="234" data-speed="5000" data-refresh-interval="50"></span>
-								<span class="fh5co-counter-label"></span>
+								<span class="fh5co-counter-label">exhaust used</span>
 							</div>
 							<div class="col-md-3 text-center">
 								<span class="fh5co-counter js-counter" data-from="0" data-to="6542" data-speed="5000" data-refresh-interval="50"></span>
-								<span class="fh5co-counter-label"></span>
+								<span class="fh5co-counter-label">barrier used</span>
 							</div>
 							<div class="col-md-3 text-center">
 								<span class="fh5co-counter js-counter" data-from="0" data-to="8687" data-speed="5000" data-refresh-interval="50"></span>
-								<span class="fh5co-counter-label"></span>
+								<span class="fh5co-counter-label"> heal used</span>
 							</div>
 						</div>
 					</div>
@@ -192,14 +204,15 @@
 		</div>
 	</section>
 
-	<!-- <section id="fh5co-explore" data-section="explore">
+	<section id="fh5co-explore" data-section="explore"><!-- wewwerwerwerwerwerwe -->
 		<div class="container">
 			<div class="row">
 				<div class="col-md-12 section-heading text-center">
-					<h2 class="to-animate">Project Done</h2>
+					<h2 class="to-animate" id="explain"> Concept </h2>
 					<div class="row">
 						<div class="col-md-8 col-md-offset-2 subtext to-animate">
-							<h3>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</h3>
+							<h3><font size ="5"> Azircoin was created with the goal of being a currency that can be used by the players themselves and to gain value over time.
+							In addition, in subsequent developments the same users who buy azircoin and burn it will get in return another token that can be spent on a marketplace that is under construction, it will be possible to buy products from riot games and general gaming-related products from it. </font></h3>
 						</div>
 					</div>
 				</div>
@@ -208,60 +221,44 @@
 		<div class="fh5co-project">
 			<div class="container">
 				<div class="row">
-					<div class="col-md-12 text-center">
-						<div class="project-grid to-animate-2" style="{{ url_for('static', filename='images/project-1.jpg') }}">
+					<div class="col-md-12 bgimgg text-center">
+						<div class="project-grid  to-animate-2" style="">
 							<div class="desc">
-								<h3><a href="#">MasCom Template</a></h3>
-								<span>By: Louie D' Great</span>
+								<h3><a href="#"> Azir coin is based on technology An ERC20 token contract keeps track of fungible tokens. </a></h3>
+								<span></span>
 							</div>
 						</div>
 					</div>
-					<div class="col-md-12 text-center">
-						<div class="project-grid to-animate-2" style="{{ url_for('static', filename='images/project-2.jpg') }}">
-							<div class="desc">
-								<h3><a href="#">Long Tower</a></h3>
-								<span>By: John Doe</span>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-12 text-center">
+					<div class="col-md-12 text-center" data-section="pricing">
 						<div class="project-grid to-animate-2" style="{{ url_for('static', filename='images/project-3.jpg') }}">
 							<div class="desc">
-								<h3><a href="#">Flash Theme</a></h3>
-								<span>By: Thomas Jones</span>
+								<h3 id="timeline"><a href="#"> TIMELINE </a></h3>
+								<span></span>
 							</div>
 						</div>
 					</div>
 					<div class="col-md-12 text-center">
 						<div class="project-grid to-animate-2" style="{{ url_for('static', filename='images/project-4.jpg') }}">
 							<div class="desc">
-								<h3><a href="#">Tattoo</a></h3>
-								<span>By: Louie D' Great</span>
+								<h3><a href="#"> TIMELINE </a></h3>
+								<span> </span>
 							</div>
 						</div>
 					</div>
-					<div class="col-md-12 text-center">
+					<!-- <div class="col-md-12 text-center">
 						<div class="project-grid to-animate-2" style="{{ url_for('static', filename='images/project-5.jpg') }}">
 							<div class="desc">
 								<h3><a href="#">Train Theme</a></h3>
-								<span>By: Ivan Kim</span>
+								<span></span>
 							</div>
 						</div>
-					</div>
-					<div class="col-md-12 text-center">
-						<div class="project-grid to-animate-2" style="{{ url_for('static', filename='images/project-6.jpg') }}">
-							<div class="desc">
-								<h3><a href="#">Dance Theme</a></h3>
-								<span>By: FreeHTML5.co</span>
-							</div>
-						</div>
-					</div>
+					</div> -->
 				</div>
 			</div>	
 		</div>
 	</section>
 	
-	<section id="fh5co-pricing" data-section="pricing">
+	<!--<section id="fh5co-pricing" data-section="pricing">
 		<div class="fh5co-pricing">
 			<div class="container">
 				<div class="row">
@@ -493,6 +490,10 @@
 	<script src="{{ url_for('static', filename='js/jquery.stellar.min.js') }}"></script>
 	<!-- Counters -->
 	<script src="{{ url_for('static', filename='js/jquery.countTo.js') }}"></script>
+
+	<script src="{{ url_for('static', filename='js/jquery.style.switcher.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/respond.min.js') }}"></script>
+
 	<!-- Main JS (Do not remove) -->
 	<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
