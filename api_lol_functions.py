@@ -12,8 +12,8 @@ load_dotenv()
 # TO DO
 # ECONOMY
 # DEPLOY
-# AGGIUSTARE FRONTEND
 # EXCHANGE
+# ADD EVENTS BASED ON SUMM SPELL
 
 
 class LoL:
@@ -25,7 +25,16 @@ class LoL:
     
     def __init__(self, name):
         self.name = name
+    
+
+    def conn_db(self):
+
+        conn = mysql.connector.connect(user=os.getenv("USER"), password=os.getenv("PWD"),
+                              host='127.0.0.1',
+                              database='azircoin')
         
+        return conn
+    
 
     def conn_for_burn(self):
         #10
@@ -39,10 +48,10 @@ class LoL:
         nonce = w3.eth.get_transaction_count(caller)
         print(w3.is_connected())
         contract_address = '0x6117A5F053e65Aa9bcbE064cD186Ed9580353bCa'
-        data = open('abi.json')
+        data = open(r'C:\Users\Reidi\dev\finiromai\abi.json')
         abi = json.load(data)
         # contract = w3.eth.contract(address=contract_address, abi=abi)
-        data = open('bytecode')
+        data = open(r'C:\Users\Reidi\dev\finiromai\bytecode')
         bytecodedelcazzo = data.readline()
         bytecode = bytecodedelcazzo
         
@@ -71,7 +80,7 @@ class LoL:
         w3 = Web3(Web3.HTTPProvider('https://goerli.infura.io/v3/eba9e534005045928e460351c954cbf8'))
         w3.middleware_onion.inject(geth_poa_middleware, layer=0)
         contract_address = '0x6117A5F053e65Aa9bcbE064cD186Ed9580353bCa'
-        data = open(r'D:\Dev\finiromai\abi.json')
+        data = open(r'C:\Users\Reidi\dev\finiromai\abi.json')
         abi = json.load(data)
         
         token = w3.eth.contract(address=contract_address, abi=abi) # declaring the token contract
@@ -182,16 +191,62 @@ class LoL:
             
         return self.amount
     
+
+    def challenges(self):
+
+        games = self.list_game_by_puuid()
+        game = games[0]
+        url = f"https://europe.api.riotgames.com/lol/match/v5/matches/{game}?api_key={self.api_key}"
+        r = requests.get(url)
+        data = r.json()
+        role = data["info"]
+        player = role["participants"]
+        chall = player[0]
+
+        travel = chall["challenges"]
+        summ_used = travel["abilityUses"]
+        print(summ_used)
+
+        try:
+
+            cnx = self.conn_db()
+            cursor = cnx.cursor()
+            query = "SELECT summonerspell  FROM summoners WHERE id=1;"
+            cursor.execute(query,)
+            value_summ = cursor.fetchall()
+            value_extracted = value_summ[0] #last value of summonerspell
+            print(value_summ[0])
+
+            args = (int(summ_used)),
+            query = f'UPDATE summoners SET lstvalue = %s WHERE id = 1; '
+            cursor.execute(query, args)
+            cnx.commit()
+
+            final_value = summ_used + value_extracted[0]
+            args = (final_value),
+            query = f'UPDATE summoners SET summonerspell = %s WHERE id = 1; '
+            cursor.execute(query, args)
+            cnx.commit()
+            cnx.close()
+
+            return summ_used, final_value
+            
+        except mysql.connector.Error as err:
+
+            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                print("Something is wrong with your user name or password")
+            elif err.errno == errorcode.ER_BAD_DB_ERROR:
+                print("Database does not exist")
+            else:
+                print(err)
     
+
     def read_data_db(self):
         #7 
         final_result = []
         
         try:
-            cnx = mysql.connector.connect(user=os.getenv("USER"), password=os.getenv("PWD"),
-                              host='127.0.0.1',
-                              database='azircoin')
-            
+            cnx = self.conn_db()
             query = "SELECT matchid FROM marchtable;"
             cursor = cnx.cursor(buffered=True) 
             cursor.execute(query)
@@ -209,7 +264,7 @@ class LoL:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                print("Database does not exist")
+                print("cazzo")
             else:
                 print(err)
         else:
@@ -226,9 +281,7 @@ class LoL:
         print("--------------------")
         
         try:
-            cnx = mysql.connector.connect(user=os.getenv("USER"), password=os.getenv("PWD"),
-                              host='127.0.0.1',
-                              database='azircoin')
+            cnx = self.conn_db()
             cursor = cnx.cursor()
             for prova in game_played:
                 query = "INSERT INTO marchtable (matchid) VALUES(%s);"
@@ -295,7 +348,3 @@ class LoL:
         print("CIAOOOOOOOOOOOOO: "+ str(amount_to_burn))
     
         print("##################################")
-
-# a = LoL(name="ParmiJanna")
-
-# print(a.get_balance())

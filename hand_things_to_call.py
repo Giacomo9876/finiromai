@@ -1,6 +1,4 @@
-from pytz import utc
 from apscheduler.schedulers.background import BackgroundScheduler
-import mysql.connector
 import time
 import os
 from api_lol_functions import LoL
@@ -26,10 +24,7 @@ class JobToDo:
         tkn_burned = cursor.fetchall()
         tkn_burned_extracted = tkn_burned[0]
         value = tkn_burned_extracted[0]
-        print(type(tkn_burned_extracted))
-        print(value)
         value = value + a.amount
-        print(value)
         query = f'UPDATE {self._dbvalue} SET {self._valuedb} = %s WHERE id = 1; '
         args = (value),
         cursor.execute(query, args)
