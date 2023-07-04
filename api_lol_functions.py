@@ -14,6 +14,7 @@ load_dotenv()
 # DEPLOY
 # EXCHANGE
 # ADD EVENTS BASED ON SUMM SPELL
+# ADD DYNAMIC PATH
 
 
 class LoL:
@@ -30,7 +31,7 @@ class LoL:
     def conn_db(self):
 
         conn = mysql.connector.connect(user=os.getenv("USER"), password=os.getenv("PWD"),
-                              host='127.0.0.1',
+                              host='127.0.0.1', port=3306, 
                               database='azircoin')
         
         return conn
@@ -42,6 +43,7 @@ class LoL:
         w3 = Web3(Web3.HTTPProvider('https://goerli.infura.io/v3/eba9e534005045928e460351c954cbf8'))
         w3.middleware_onion.inject(geth_poa_middleware, layer=0)
         amount_to_burn = self.amount
+        print("Amount to burn:"+ amount_to_burn)
         caller = "0xFdB5e4A6273Ddf2A1D09a377C9E4eb407b3De2C4"
         private_key = os.getenv("API_SECRET")  # To sign the transaction
         # Initialize address nonce
@@ -199,37 +201,91 @@ class LoL:
         url = f"https://europe.api.riotgames.com/lol/match/v5/matches/{game}?api_key={self.api_key}"
         r = requests.get(url)
         data = r.json()
-        role = data["info"]
-        player = role["participants"]
-        chall = player[0]
 
-        travel = chall["challenges"]
-        summ_used = travel["abilityUses"]
-        print(summ_used)
+        matchidisequaltoold = data['metadata']['matchId']
+        compare_matchid = self.avoid_refresh_vl_challenges()
 
+        if matchidisequaltoold == compare_matchid:
+            cnx = self.conn_db()
+            cursor = cnx.cursor()
+            query = "SELECT summonerspell, lstvalue  FROM summoners WHERE id=1;"
+            cursor.execute(query,)
+            summoners, lstvalue = cursor.fetchall()[0]
+            return lstvalue, summoners
+        else:
+        
+            role = data["info"]
+            player = role["participants"]
+            chall = player[0]
+
+            travel = chall["challenges"]
+            summ_used = travel["abilityUses"]
+            print("asdasdasdasdasd"+ str(summ_used))
+
+            try:
+
+                cnx = self.conn_db()
+                cursor = cnx.cursor()
+                query = "SELECT summonerspell  FROM summoners WHERE id=1;"
+                cursor.execute(query,)
+                value_summ = cursor.fetchall()
+                value_extracted = value_summ[0] #last value of summonerspell
+                print("ddddddddddd"+str(value_summ[0]))
+
+                args = (int(summ_used)),
+                query = f'UPDATE summoners SET lstvalue = %s WHERE id = 1; '
+                cursor.execute(query, args)
+                cnx.commit()
+                
+
+                final_value = summ_used + value_extracted[0]
+                args = (final_value),
+                query = f'UPDATE summoners SET summonerspell = %s WHERE id = 1; '
+                cursor.execute(query, args)
+                cnx.commit()
+                cnx.close()
+
+                return summ_used, final_value
+                
+            except mysql.connector.Error as err:
+
+                if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                    print("Something is wrong with your user name or password")
+                elif err.errno == errorcode.ER_BAD_DB_ERROR:
+                    print("Database does not exist")
+                else:
+                    print(err)
+    
+    
+    def avoid_refresh_vl_challenges(self):
+
+        games = self.list_game_by_puuid()
+        game = games[0]
+        url = f"https://europe.api.riotgames.com/lol/match/v5/matches/{game}?api_key={self.api_key}"
+        r = requests.get(url)
+        data = r.json()
+
+        matchidisequaltoold = data['metadata']['matchId']
         try:
 
             cnx = self.conn_db()
             cursor = cnx.cursor()
-            query = "SELECT summonerspell  FROM summoners WHERE id=1;"
-            cursor.execute(query,)
-            value_summ = cursor.fetchall()
-            value_extracted = value_summ[0] #last value of summonerspell
-            print(value_summ[0])
+            args = (matchidisequaltoold),
+            
+            query = f'SELECT matchId FROM summoners WHERE id = 1; '
+            cursor.execute(query, )
+            value_matchid_fromdb = cursor.fetchall()[0]
+            print(value_matchid_fromdb)
 
-            args = (int(summ_used)),
-            query = f'UPDATE summoners SET lstvalue = %s WHERE id = 1; '
-            cursor.execute(query, args)
-            cnx.commit()
-
-            final_value = summ_used + value_extracted[0]
-            args = (final_value),
-            query = f'UPDATE summoners SET summonerspell = %s WHERE id = 1; '
-            cursor.execute(query, args)
-            cnx.commit()
-            cnx.close()
-
-            return summ_used, final_value
+            if value_matchid_fromdb[0] != matchidisequaltoold:
+                query = f'UPDATE summoners SET matchId = %s WHERE id = 1; '
+                cursor.execute(query, args)
+                cnx.commit()
+                cnx.close()
+                return value_matchid_fromdb[0]
+            else:
+                print("fucking refersh")
+                return matchidisequaltoold
             
         except mysql.connector.Error as err:
 
@@ -239,7 +295,7 @@ class LoL:
                 print("Database does not exist")
             else:
                 print(err)
-    
+
 
     def read_data_db(self):
         #7 
@@ -348,3 +404,7 @@ class LoL:
         print("CIAOOOOOOOOOOOOO: "+ str(amount_to_burn))
     
         print("##################################")
+
+
+a = LoL(name="ParmiJanna")
+print(a.avoid_refresh_vl_challenges())

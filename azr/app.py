@@ -11,7 +11,7 @@ import time
 
 
 app = Flask(__name__)#, template_folder='template')
-app.run(debug=True)
+# app.run(debug=True)
  
 # app.run(host='localhost', port=5000)
 
@@ -23,7 +23,7 @@ def hello():
     value = a.get_balance()
     cnx = a.conn_db()
     cursor = cnx.cursor()
-    query = "SELECT tknburned FROM storage WHERE id=1;"#"INSERT INTO allstorage (alltokken) VALUES(%d);"
+    query = "SELECT tknburned FROM storage WHERE id=1;"#"INSERT INTO allstorage (alltokken) VALUES(%d);"#need to make the argument of the query dinamic avoid sqlinj
     cursor.execute(query,)
     tkn_burned = cursor.fetchall()
     tkn_burned_extracted = tkn_burned[0]

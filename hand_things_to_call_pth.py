@@ -25,28 +25,13 @@ class JobToDo:
         tkn_burned_extracted = tkn_burned[0]
         value = tkn_burned_extracted[0]
         value = value + a.amount
-        query = f'UPDATE {self._dbvalue} SET {self._valuedb} = %s WHERE id = 1; '
+        query = f'UPDATE {self._dbvalue} SET {self._valuedb} = %s WHERE id = 1;'
         args = (value),
         cursor.execute(query, args)
         cnx.commit()
         cnx.close()
         
-    def conn_web(self):
-
-        scheduler = BackgroundScheduler()
-        scheduler.add_job(self.shitcalling, 'interval', seconds=82800)#23h = 82800
-        scheduler.start()
-        print('Press Ctrl+{0} to exit'.format('Break' if os.name == 'nt' else 'C'))
-
-        try:
-            # This is here to simulate application activity (which keeps the main thread alive).
-            while True:
-                time.sleep(30)
-        except (KeyboardInterrupt, SystemExit):
-            # Not strictly necessary if daemonic mode is enabled but should be done if possible
-            scheduler.shutdown()
-        
  
 
-# a = JobToDo()
-# print(a.conn_web())
+a = JobToDo()
+print(a.shitcalling())
